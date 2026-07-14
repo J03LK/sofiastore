@@ -17,14 +17,17 @@ const Home = () => {
         animate={{ opacity: 0, display: 'none' }}
         transition={{ delay: 2, duration: 1, ease: "easeInOut" }}
       >
-        <motion.h1 
-          className="text-7xl md:text-9xl font-logo font-bold text-primary drop-shadow-sm"
+        <motion.div 
+          className="flex flex-col items-center gap-6"
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 1.2, ease: "easeOut" }}
         >
-          Sofia Store
-        </motion.h1>
+          <img src="/icon.png" alt="Icono" className="w-32 md:w-48 mix-blend-multiply drop-shadow-sm" />
+          <h1 className="text-7xl md:text-9xl font-logo font-bold text-primary drop-shadow-sm">
+            Sofia Store
+          </h1>
+        </motion.div>
       </motion.div>
 
       {/* Main Content */}
