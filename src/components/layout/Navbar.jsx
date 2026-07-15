@@ -1,18 +1,17 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FaFacebook, FaInstagram, FaTiktok, FaWhatsapp, FaBars, FaTimes, FaUserLock } from 'react-icons/fa';
+import { FaFacebook, FaInstagram, FaTiktok, FaWhatsapp, FaBars, FaTimes, FaUserLock, FaSun, FaMoon } from 'react-icons/fa';
+import { useTheme } from '../../context/ThemeContext';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const { theme, toggleTheme } = useTheme();
 
   const toggleMenu = () => setIsOpen(!isOpen);
 
   const navLinks = [
     { name: 'Inicio', path: '/' },
-    { name: 'Catálogo', path: '/catalog' },
-    { name: 'Nuevos', path: '/catalog?filter=new' },
-    { name: 'Contacto', path: '#contact' },
   ];
 
   return (
@@ -26,7 +25,7 @@ const Navbar = () => {
               animate={{ opacity: 1, scale: 1 }}
               src="/icon.png" 
               alt="Icono" 
-              className="h-10 w-auto mix-blend-multiply"
+              className="h-10 w-auto mix-blend-multiply dark:mix-blend-normal dark:invert dark:opacity-80"
             />
             <motion.span 
               initial={{ opacity: 0, x: -20 }}
@@ -60,6 +59,9 @@ const Navbar = () => {
             </div>
 
             <div className="flex items-center space-x-4">
+              <button onClick={toggleTheme} className="text-textMuted hover:text-primary transition-colors p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800" title="Alternar modo oscuro">
+                {theme === 'dark' ? <FaSun size={20} className="text-yellow-500" /> : <FaMoon size={20} />}
+              </button>
               <a href="https://wa.me/593979268641" target="_blank" rel="noreferrer" className="bg-success text-white px-4 py-2 rounded-full flex items-center gap-2 hover:bg-green-600 transition-colors shadow-sm">
                 <FaWhatsapp /> <span>WhatsApp</span>
               </a>
@@ -103,8 +105,11 @@ const Navbar = () => {
                 <a href="https://instagram.com" target="_blank" rel="noreferrer" className="text-textMuted hover:text-primary"><FaInstagram size={24} /></a>
                 <a href="https://tiktok.com" target="_blank" rel="noreferrer" className="text-textMuted hover:text-primary"><FaTiktok size={24} /></a>
               </div>
-              <div className="px-3 py-2 flex justify-between items-center">
-                 <a href="https://wa.me/593979268641" target="_blank" rel="noreferrer" className="bg-success text-white px-4 py-2 rounded-full flex items-center gap-2 w-full justify-center">
+              <div className="px-3 py-2 flex justify-between items-center gap-4">
+                 <button onClick={toggleTheme} className="text-textMuted hover:text-primary transition-colors p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-center bg-gray-50 dark:bg-gray-800 flex-1">
+                   {theme === 'dark' ? <FaSun size={20} className="text-yellow-500" /> : <FaMoon size={20} />}
+                 </button>
+                 <a href="https://wa.me/593979268641" target="_blank" rel="noreferrer" className="bg-success text-white px-4 py-2 rounded-full flex items-center gap-2 flex-1 justify-center">
                   <FaWhatsapp /> <span>WhatsApp</span>
                 </a>
               </div>

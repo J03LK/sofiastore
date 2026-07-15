@@ -23,7 +23,7 @@ const Home = () => {
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 1.2, ease: "easeOut" }}
         >
-          <img src="/icon.png" alt="Icono" className="w-32 md:w-48 mix-blend-multiply drop-shadow-sm" />
+          <img src="/icon.png" alt="Icono" className="w-32 md:w-48 mix-blend-multiply drop-shadow-sm dark:mix-blend-normal dark:invert dark:opacity-80" />
           <h1 className="text-7xl md:text-9xl font-logo font-bold text-primary drop-shadow-sm">
             Sofia Store
           </h1>

@@ -4,6 +4,7 @@ export default {
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
+  darkMode: 'class',
   theme: {
     extend: {
       colors: {
@@ -25,6 +26,14 @@ export default {
           300: '#d4d4d8',
           800: '#27272a',
           900: '#18181b',
+        },
+        noir: {
+          bg: '#131313',
+          surface: '#1E1E1E',
+          border: '#2A2A2A',
+          muted: '#666666',
+          text: '#EAEAEA',
+          main: '#2E2E2E'
         }
       },
       fontFamily: {
@@ -35,6 +44,7 @@ export default {
       boxShadow: {
         'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
         'hover': '0 10px 30px -5px rgba(217, 108, 143, 0.15)',
+        'glow-primary': '0 0 15px rgba(217, 108, 143, 0.4)',
       }
     },
   },
