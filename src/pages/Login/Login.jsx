@@ -78,7 +78,7 @@ const Login = () => {
           <button 
             type="submit" 
             disabled={isLoading}
-            className="w-full bg-button hover:bg-button-hover text-white font-bold py-3 px-4 rounded-xl transition-all disabled:opacity-70 flex justify-center"
+            className="w-full bg-primary hover:bg-primary-hover text-white font-bold py-3 px-4 rounded-xl transition-all disabled:opacity-70 flex justify-center"
           >
             {isLoading ? 'Ingresando...' : 'Iniciar Sesión'}
           </button>

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FaUpload, FaTrash, FaPlus, FaCheckCircle, FaUserPlus, FaWallet, FaWhatsapp, FaTiktok, FaSignOutAlt } from 'react-icons/fa';
+import { Link } from 'react-router-dom';
+import { FaUpload, FaTrash, FaPlus, FaCheckCircle, FaUserPlus, FaWallet, FaWhatsapp, FaTiktok, FaSignOutAlt, FaUserLock } from 'react-icons/fa';
 import { 
   createOrder, 
   uploadOrderImage, 
@@ -18,6 +19,7 @@ const OrderClient = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [authError, setAuthError] = useState('');
   const [isRegistering, setIsRegistering] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [isAuthenticating, setIsAuthenticating] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
 
@@ -70,12 +72,16 @@ const OrderClient = () => {
     }
   };
 
-  const handleRegister = async () => {
+  const handleRegisterClick = () => {
     if (!whatsapp.trim() || !tiktokName.trim()) {
       setAuthError('Por favor llena ambos campos.');
       return;
     }
+    setShowConfirmModal(true);
+  };
 
+  const confirmRegister = async () => {
+    setShowConfirmModal(false);
     setIsAuthenticating(true);
     setAuthError('');
 
@@ -248,7 +254,7 @@ const OrderClient = () => {
           animate={{ y: 0, opacity: 1 }}
           className="bg-white dark:bg-noir-surface p-8 rounded-3xl shadow-lg max-w-md w-full border border-gray-100 dark:border-noir-border"
         >
-          <div className="text-center mb-8">
+          <div className="text-center mb-8 relative">
             <div className="flex items-center justify-center gap-3 mb-6">
               <img src="/icon.png" alt="Icono" className="h-12 w-auto mix-blend-multiply dark:mix-blend-normal dark:invert dark:opacity-80" />
               <span className="font-logo font-bold text-4xl text-primary mt-1">Sofia Store</span>
@@ -266,8 +272,10 @@ const OrderClient = () => {
                 <FaWhatsapp className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
                 <input
                   type="text"
+                  inputMode="numeric"
+                  maxLength="10"
                   value={whatsapp}
-                  onChange={(e) => setWhatsapp(e.target.value)}
+                  onChange={(e) => setWhatsapp(e.target.value.replace(/\D/g, '').slice(0, 10))}
                   placeholder="Ej: 0991234567"
                   className="w-full pl-12 pr-4 py-3 bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all dark:text-white"
                   required
@@ -305,20 +313,76 @@ const OrderClient = () => {
                 disabled={isAuthenticating}
                 className="w-full bg-gray-900 hover:bg-gray-800 text-white py-3 rounded-xl font-medium transition-colors disabled:opacity-50 flex justify-center items-center gap-2"
               >
-                {isAuthenticating ? 'Verificando...' : 'Entrar'}
+                {isAuthenticating ? 'Verificando...' : 'Iniciar Sesión'}
               </button>
             ) : (
-              <button
-                type="button"
-                onClick={handleRegister}
-                disabled={isAuthenticating}
-                className="w-full bg-primary hover:bg-primary-hover text-white py-3 rounded-xl font-medium transition-all shadow-hover hover:shadow-glow-primary dark:shadow-glow-primary disabled:opacity-50 flex justify-center items-center gap-2"
-              >
-                <FaUserPlus /> {isAuthenticating ? 'Registrando...' : 'Registrarme'}
-              </button>
+              <div className="space-y-3">
+                <button
+                  type="button"
+                  onClick={handleRegisterClick}
+                  disabled={isAuthenticating}
+                  className="w-full bg-primary hover:bg-primary-hover text-white py-3 rounded-xl font-medium transition-all shadow-hover hover:shadow-glow-primary dark:shadow-glow-primary disabled:opacity-50 flex justify-center items-center gap-2"
+                >
+                  <FaUserPlus /> {isAuthenticating ? 'Registrando...' : 'Registrarme'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsRegistering(false)}
+                  className="w-full bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 py-3 rounded-xl font-medium transition-colors flex justify-center items-center gap-2"
+                >
+                  Volver a Iniciar Sesión
+                </button>
+              </div>
             )}
           </form>
         </motion.div>
+
+        {/* Confirmation Modal */}
+        <AnimatePresence>
+          {showConfirmModal && (
+            <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                className="bg-white dark:bg-noir-surface p-6 rounded-2xl shadow-xl max-w-sm w-full border border-gray-100 dark:border-noir-border"
+              >
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2 text-center">Verifica tus datos</h3>
+                <p className="text-gray-600 dark:text-gray-400 mb-6 text-center text-sm">
+                  ¿Son correctos tu número y usuario? Si hay un error, no podrás recuperar tus prendas.
+                </p>
+                <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 mb-6 space-y-3 border border-gray-100 dark:border-gray-700">
+                  <div>
+                    <span className="text-xs text-gray-500 uppercase font-bold tracking-wider">WhatsApp</span>
+                    <p className="text-lg font-medium text-gray-900 dark:text-white flex items-center gap-2">
+                      <FaWhatsapp className="text-green-500" /> {whatsapp}
+                    </p>
+                  </div>
+                  <div>
+                    <span className="text-xs text-gray-500 uppercase font-bold tracking-wider">TikTok</span>
+                    <p className="text-lg font-medium text-gray-900 dark:text-white flex items-center gap-2">
+                      <FaTiktok className="text-gray-400" /> {tiktokName}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setShowConfirmModal(false)}
+                    className="flex-1 px-4 py-3 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl font-medium transition-colors"
+                  >
+                    No, corregir
+                  </button>
+                  <button
+                    onClick={confirmRegister}
+                    className="flex-1 px-4 py-3 bg-primary hover:bg-primary-hover text-white rounded-xl font-medium transition-colors shadow-sm"
+                  >
+                    Sí, registrar
+                  </button>
+                </div>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>
       </div>
     );
   }
