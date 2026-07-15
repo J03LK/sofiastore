@@ -104,7 +104,7 @@ const OrderManager = () => {
           placeholder="Buscar por número de WhatsApp o identificador..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full px-4 py-2 border border-gray-200 dark:border-noir-border dark:bg-noir-bg rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-2xl font-bold dark:text-white"
+          className="w-full pl-12 pr-4 py-3 border border-gray-200 dark:border-noir-border dark:bg-noir-bg rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-medium dark:text-white"
         />
       </div>
 
@@ -188,7 +188,7 @@ const OrderManager = () => {
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-white dark:bg-noir-surface rounded-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto shadow-xl flex flex-col"
+            className="bg-white dark:bg-noir-surface rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-xl flex flex-col"
           >
             <div className="sticky top-0 bg-white/90 dark:bg-noir-surface/90 backdrop-blur border-b border-gray-100 dark:border-noir-border p-6 flex justify-between items-center z-10">
               <div>
@@ -278,20 +278,17 @@ const OrderManager = () => {
               {/* Items */}
               <div>
                 <h4 className="font-medium text-lg mb-4 dark:text-gray-100">Prendas ({selectedOrder.order_items?.length || 0})</h4>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {selectedOrder.order_items?.map((item) => (
-                    <div key={item.id} className="border border-gray-100 dark:border-gray-700 rounded-xl overflow-hidden bg-white dark:bg-gray-800 shadow-sm">
-                      <div className="aspect-[3/4] bg-gray-50 dark:bg-gray-900 relative">
-                        <img
-                          src={item.image_url}
-                          alt="Prenda"
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                      <div className="p-3 text-center border-t border-gray-100 dark:border-gray-700">
-                        <span className="font-medium dark:text-gray-200">${Number(item.price).toFixed(2)}</span>
-                      </div>
-                    </div>
+                    <OrderItemEditor 
+                      key={item.id} 
+                      item={item} 
+                      orderId={selectedOrder.id}
+                      onItemUpdated={(updatedOrder) => {
+                        setOrders(orders.map(o => o.id === updatedOrder.id ? updatedOrder : o));
+                        setSelectedOrder(updatedOrder);
+                      }}
+                    />
                   ))}
                 </div>
               </div>
@@ -304,4 +301,97 @@ const OrderManager = () => {
   );
 };
 
+const OrderItemEditor = ({ item, orderId, onItemUpdated }) => {
+  const [price, setPrice] = useState(item.price);
+  const [comment, setComment] = useState(item.comment || '');
+  const [isSaving, setIsSaving] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+
+  const handleSave = async () => {
+    setIsSaving(true);
+    try {
+      const { updateOrderItem } = await import('../../services/supabase/orderService');
+      const updatedOrder = await updateOrderItem(item.id, orderId, price, comment);
+      setIsEditing(false);
+      onItemUpdated(updatedOrder);
+    } catch (error) {
+      alert("Error al actualizar la prenda");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  return (
+    <div className="flex bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden shadow-sm">
+      <div className="w-1/3 bg-gray-50 dark:bg-gray-900 flex-shrink-0">
+        <a href={item.image_url} target="_blank" rel="noopener noreferrer">
+          <img src={item.image_url} alt="Prenda" className="w-full h-full object-cover min-h-[120px]" />
+        </a>
+      </div>
+      <div className="p-4 flex flex-col justify-center flex-1 space-y-3">
+        {isEditing ? (
+          <>
+            <div>
+              <label className="block text-xs text-gray-500 mb-1">Precio ($)</label>
+              <input
+                type="number"
+                step="0.01"
+                min="0"
+                value={price}
+                onChange={(e) => setPrice(e.target.value)}
+                className="w-full px-2 py-1 text-sm bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded focus:outline-none focus:border-primary dark:text-white"
+              />
+            </div>
+            <div>
+              <label className="block text-xs text-gray-500 mb-1">Comentario (opcional)</label>
+              <textarea
+                value={comment}
+                onChange={(e) => setComment(e.target.value)}
+                rows={2}
+                placeholder="Ej: Te lo dejo a 50ctvs..."
+                className="w-full px-2 py-1 text-sm bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded focus:outline-none focus:border-primary resize-none dark:text-white"
+              />
+            </div>
+            <div className="flex gap-2 justify-end mt-1">
+              <button 
+                onClick={() => setIsEditing(false)} 
+                className="text-xs text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+              >
+                Cancelar
+              </button>
+              <button 
+                onClick={handleSave} 
+                disabled={isSaving}
+                className="text-xs bg-primary hover:bg-primary-hover text-white px-3 py-1 rounded"
+              >
+                {isSaving ? 'Guardando...' : 'Guardar'}
+              </button>
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="flex justify-between items-start">
+              <span className="font-semibold text-lg dark:text-gray-100">${Number(item.price).toFixed(2)}</span>
+              <button 
+                onClick={() => setIsEditing(true)}
+                className="text-xs text-primary hover:underline"
+              >
+                Editar
+              </button>
+            </div>
+            {item.comment ? (
+              <div className="bg-primary/5 dark:bg-primary/10 p-2 rounded text-sm text-gray-600 dark:text-gray-300 italic border-l-2 border-primary">
+                "{item.comment}"
+              </div>
+            ) : (
+              <div className="text-xs text-gray-400 italic">Sin comentarios</div>
+            )}
+          </>
+        )}
+      </div>
+    </div>
+  );
+};
+
 export default OrderManager;
+

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { getAllClients } from '../../services/supabase/orderService';
-import { FaSearch, FaWhatsapp, FaTiktok } from 'react-icons/fa';
+import { getAllClients, deleteClient } from '../../services/supabase/orderService';
+import { FaSearch, FaWhatsapp, FaTiktok, FaTrash } from 'react-icons/fa';
 
 const ClientManager = () => {
   const [clients, setClients] = useState([]);
@@ -22,6 +22,17 @@ const ClientManager = () => {
   useEffect(() => {
     fetchClients();
   }, []);
+
+  const handleDeleteClient = async (clientId, clientName) => {
+    if (window.confirm(`¿Estás segura de que deseas eliminar a la clienta ${clientName}? Esto no se puede deshacer y puede eliminar sus pedidos si están enlazados.`)) {
+      try {
+        await deleteClient(clientId);
+        setClients(clients.filter(c => c.id !== clientId));
+      } catch (error) {
+        alert("Error al eliminar la clienta.");
+      }
+    }
+  };
 
   const filteredClients = clients.filter(client => 
     client.tiktok_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -84,14 +95,23 @@ const ClientManager = () => {
                       {new Date(client.created_at).toLocaleDateString()}
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <a
-                        href={`https://wa.me/${client.whatsapp.replace(/\D/g, '')}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-primary hover:text-primary-hover text-xs font-medium bg-primary/10 hover:bg-primary/20 px-3 py-1.5 rounded-lg transition-colors inline-block"
-                      >
-                        Contactar
-                      </a>
+                      <div className="flex items-center justify-end gap-3">
+                        <a
+                          href={`https://wa.me/${client.whatsapp.replace(/\D/g, '')}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-primary hover:text-primary-hover text-xs font-medium bg-primary/10 hover:bg-primary/20 px-3 py-1.5 rounded-lg transition-colors inline-block"
+                        >
+                          Contactar
+                        </a>
+                        <button
+                          onClick={() => handleDeleteClient(client.id, client.tiktok_name)}
+                          className="text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/40 p-2 rounded-lg transition-colors"
+                          title="Eliminar clienta"
+                        >
+                          <FaTrash size={14} />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))

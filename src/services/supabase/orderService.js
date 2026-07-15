@@ -189,8 +189,9 @@ export const getClientOrders = async (clientName) => {
   try {
     const { data, error } = await supabase
       .from('orders')
-      .select('*')
-      .eq('client_name', clientName);
+      .select('*, order_items(*)')
+      .eq('client_name', clientName)
+      .order('created_at', { ascending: false });
 
     if (error) throw error;
     return data || [];
@@ -257,5 +258,64 @@ export const getAllClients = async () => {
   }
 };
 
+/**
+ * Updates an order item (price and comment) and recalculates the order total
+ */
+export const updateOrderItem = async (itemId, orderId, newPrice, newComment) => {
+  try {
+    // 1. Update the item
+    const { error: itemError } = await supabase
+      .from('order_items')
+      .update({ 
+        price: newPrice, 
+        comment: newComment 
+      })
+      .eq('id', itemId);
 
+    if (itemError) throw itemError;
 
+    // 2. Fetch all items for this order to recalculate total
+    const { data: allItems, error: fetchError } = await supabase
+      .from('order_items')
+      .select('price')
+      .eq('order_id', orderId);
+
+    if (fetchError) throw fetchError;
+
+    // 3. Calculate new total amount
+    const newTotal = allItems.reduce((sum, item) => sum + Number(item.price), 0);
+
+    // 4. Update the order with the new total amount
+    const { data: orderData, error: orderError } = await supabase
+      .from('orders')
+      .update({ total_amount: newTotal, updated_at: new Date().toISOString() })
+      .eq('id', orderId)
+      .select('*, order_items(*)')
+      .single();
+
+    if (orderError) throw orderError;
+
+    return orderData;
+  } catch (error) {
+    console.error('Error updating order item:', error);
+    throw error;
+  }
+};
+
+/**
+ * Deletes a client
+ */
+export const deleteClient = async (clientId) => {
+  try {
+    const { error } = await supabase
+      .from('clients')
+      .delete()
+      .eq('id', clientId);
+
+    if (error) throw error;
+    return true;
+  } catch (error) {
+    console.error('Error deleting client:', error);
+    throw error;
+  }
+};

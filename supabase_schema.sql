@@ -96,6 +96,7 @@ CREATE TABLE public.order_items (
     order_id UUID REFERENCES public.orders(id) ON DELETE CASCADE,
     price DECIMAL(10,2) NOT NULL,
     image_url TEXT NOT NULL,
+    comment TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
@@ -107,10 +108,12 @@ ALTER TABLE public.order_items ENABLE ROW LEVEL SECURITY;
 -- Clientas pueden insertar (crear pedido)
 CREATE POLICY "Cualquiera puede crear pedidos" ON public.orders FOR INSERT WITH CHECK (true);
 -- Clientas pueden ver sus propios pedidos (opcional, si los buscaran) o admins ven todo. 
--- Para este caso simple, admins pueden ver/editar todo, y no hay lectura pública de pedidos por privacidad.
+-- NOTA: Se requiere lectura pública para que el sistema devuelva el ID del pedido recién creado.
+CREATE POLICY "Lectura publica de pedidos" ON public.orders FOR SELECT USING (true);
 CREATE POLICY "Admins pueden ver y modificar pedidos" ON public.orders FOR ALL USING (auth.role() = 'authenticated');
 
 -- Políticas para Prendas de Pedido
+CREATE POLICY "Lectura publica de items" ON public.order_items FOR SELECT USING (true);
 CREATE POLICY "Cualquiera puede crear items de pedido" ON public.order_items FOR INSERT WITH CHECK (true);
 CREATE POLICY "Admins pueden ver y modificar items" ON public.order_items FOR ALL USING (auth.role() = 'authenticated');
 
